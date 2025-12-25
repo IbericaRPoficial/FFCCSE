@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Configuración del Sistema</title>
+
+<style>
+body{
+  background:#0b1624;
+  color:#cfd8e3;
+  font-family:Segoe UI, Arial;
+  margin:0;
+  padding:20px;
+}
+h1,h2,h3{color:#c5a059}
+.card{
+  background:#121f33;
+  padding:15px;
+  border-radius:8px;
+  margin-bottom:15px;
+  box-shadow:0 0 10px rgba(0,0,0,.4);
+}
+label{display:block;margin-top:10px}
+input[type=range]{width:100%}
+
+/* BARRAS FAKE */
+.fake-bar{
+  height:8px;
+  background:#1f3b66;
+  border-radius:5px;
+  overflow:hidden;
+}
+.fake-bar span{
+  display:block;
+  height:100%;
+  background:#4da3ff;
+}
+
+/* MODALES */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  z-index:999;
+  justify-content:center;
+  align-items:center;
+}
+.modal-content{
+  background:#0f1d33;
+  padding:20px;
+  border-radius:10px;
+  width:420px;
+  max-height:90vh;
+  overflow:auto;
+}
+.close{
+  float:right;
+  cursor:pointer;
+  color:#ff6666;
+}
+
+/* BOTONES */
+button{
+  background:#1b355f;
+  color:#fff;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+button:hover{background:#274a7f}
+
+/* PANELES */
+.panelBox{
+  width:180px;
+  cursor:pointer;
+  text-align:center;
+  transition:.25s;
+}
+.panelBox:hover{
+  transform:scale(1.05);
+  background:#c5a059;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Configuración del Sistema</h1>
+
+<div class="card">
+  <h3>Audio</h3>
+  <label>Volumen general</label>
+  <input type="range" value="72">
+  <label>Canal comunicaciones</label>
+  <input type="range" value="86">
+</div>
+
+<div class="card">
+  <h3>Estado del sistema</h3>
+  CPU
+  <div class="fake-bar"><span style="width:43%"></span></div><br>
+  Red
+  <div class="fake-bar"><span style="width:68%"></span></div>
+</div>
+
+<div class="card">
+  ✔ Sincronización activa<br>
+  ✔ Canales cifrados<br>
+  ✔ Integridad verificada
+</div>
+
+<!-- MODAL VERIFICACIÓN -->
+<div class="modal" id="authModal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarAuth()">✖</span>
+    <h3>Verificación de acceso</h3>
+    <input type="text" id="pass" placeholder="Código de autorización">
+    <br><br>
+    <button onclick="verificar()">Verificar</button>
+    <p id="error" style="color:#ff6666"></p>
+  </div>
+</div>
+
+<!-- MODAL CNI -->
+<div class="modal" id="cniModal">
+  <div class="modal-content" id="cniContent">
+    <span class="close" onclick="cerrarCNI()">✖</span>
+    <button id="btnAtras" onclick="volverAtras()" style="display:none;margin-bottom:10px">⬅ Atrás</button>
+    <div id="cniBody"></div>
+  </div>
+</div>
+
+<script>
+/* =====================
+   SECUENCIA SECRETA
+===================== */
+let seq=[];
+document.addEventListener("keydown",e=>{
+  seq.push(e.key.toUpperCase());
+  seq=seq.slice(-6);
+  if(seq.join("")==="CONTROLALTSHIFTCNI"){
+    document.getElementById("authModal").style.display="flex";
+  }
+});
+
+/* =====================
+   CERRAR MODALES
+===================== */
+function cerrarAuth(){
+  document.getElementById("authModal").style.display="none";
+}
+function cerrarCNI(){
+  document.getElementById("cniModal").style.display="none";
+  historialCNI=[];
+  document.getElementById("btnAtras").style.display="none";
+}
+
+/* =====================
+   HISTORIAL MODAL
+===================== */
+let historialCNI=[];
+
+function guardarEstado(){
+  historialCNI.push({
+    html: document.getElementById("cniBody").innerHTML,
+    width: document.getElementById("cniContent").style.width,
+    height: document.getElementById("cniContent").style.height
+  });
+  document.getElementById("btnAtras").style.display="inline-block";
+}
+
+function volverAtras(){
+  if(historialCNI.length===0) return;
+  const e = historialCNI.pop();
+  document.getElementById("cniBody").innerHTML = e.html;
+  document.getElementById("cniContent").style.width = e.width;
+  document.getElementById("cniContent").style.height = e.height;
+  if(historialCNI.length===0){
+    document.getElementById("btnAtras").style.display="none";
+  }
+}
+
+/* =====================
+   VERIFICAR CONTRASEÑA
+===================== */
+function verificar(){
+  const pass = document.getElementById("pass").value;
+  const body = document.getElementById("cniBody");
+  const modal = document.getElementById("cniModal");
+  const content = document.getElementById("cniContent");
+
+  body.innerHTML="";
+  document.getElementById("error").textContent="";
+  historialCNI=[];
+  document.getElementById("btnAtras").style.display="none";
+
+  const mostrarPaneles = (lista) => {
+    content.style.width="560px";
+    content.style.height="330px";
+    let html=`<h2>Panel de acceso CNI</h2><div style="display:flex;gap:20px;flex-wrap:wrap">`;
+    lista.forEach(p=>{
+      html+=`
+        <div class="card panelBox" onclick="abrirPanel('${p.file}')">
+          <h3>${p.icon} ${p.title}</h3>
+          <p>${p.desc}</p>
+        </div>`;
+    });
+    html+=`</div>`;
+    body.innerHTML=html;
+  };
+
+  if(pass==="Cni#8831"){
+    cerrarAuth();
+    modal.style.display="flex";
+    content.style.width="85%";
+    content.style.height="90%";
+    fetch("infiltrado.html").then(r=>r.text()).then(html=>body.innerHTML=html);
+  }
+  else if(pass==="OpCNI@2025"){
+    cerrarAuth(); modal.style.display="flex";
+    mostrarPaneles([
+      {title:"CONTRASEÑAS",icon:"📁",desc:"Acceso operativo",file:"contraseñas.html"},
+      {title:"Informes CNI",icon:"📁",desc:"Acceso técnico",file:"informescni.html"},
+      {title:"Oficializador CNI",icon:"📁",desc:"Acceso estratégico",file:"oficializadorcni.html"}
+    ]);
+  }
+  else if(pass==="RootCNI!2025"){
+    cerrarAuth(); modal.style.display="flex";
+    mostrarPaneles([
+      {title:"Infiltrados",icon:"🔐",desc:"Unidad encubierta",file:"infiltrado.html"},
+      {title:"CONTRASEÑAS",icon:"📁",desc:"Acceso operativo",file:"contraseñas.html"},
+      {title:"Informes CNI",icon:"📁",desc:"Acceso técnico",file:"informescni.html"},
+      {title:"Oficializador CNI",icon:"📁",desc:"Acceso estratégico",file:"oficializadorcni.html"}
+    ]);
+  }
+  else{
+    document.getElementById("error").textContent="Credenciales no válidas";
+  }
+}
+
+/* =====================
+   ABRIR PANEL
+===================== */
+function abrirPanel(archivo){
+  guardarEstado();
+  const body=document.getElementById("cniBody");
+  const content=document.getElementById("cniContent");
+  content.style.width="85%";
+  content.style.height="92%";
+  body.innerHTML="<p>Cargando información clasificada...</p>";
+  fetch(archivo).then(r=>r.text()).then(html=>body.innerHTML=html);
+}
+</script>
+
+</body>
+</html>

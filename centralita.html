@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Servicio Policía - Centralita Operativa</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0c0f;
+    padding: 20px;
+    color: #e6edf3;
+    margin: 0;
+}
+
+h2 { 
+    text-align: center; 
+    color: #fff; 
+    font-weight: 700; 
+    text-transform: uppercase; 
+    letter-spacing: 2px;
+    border-bottom: 2px solid #c5a059;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+form { 
+    max-width: 400px; 
+    margin: 0 auto 30px auto; 
+    padding: 25px; 
+    background: #161b22; 
+    border-radius: 4px; 
+    border-top: 5px solid #001a33;
+    border-bottom: 5px solid #2d5a27;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+form input { 
+    width: 100%; 
+    padding: 12px; 
+    margin-bottom: 15px; 
+    border-radius: 4px; 
+    border: 1px solid #30363d; 
+    background: #0d1117;
+    color: white;
+    font-size: 14px; 
+}
+
+button { 
+    padding: 10px 16px; 
+    border-radius: 4px; 
+    border: none; 
+    font-size: 12px; 
+    font-weight: bold;
+    color: #fff; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    text-transform: uppercase;
+}
+
+button[type="submit"] { 
+    background: #001a33; 
+    border: 1px solid #c5a059; 
+    width: 100%; 
+}
+
+button.asignar { background: #2d5a27; margin-top: 5px; }
+button.finalizar { background: transparent; border: 1px solid #f85149; color: #f85149; }
+button.borrar { background: #8b0000; margin-bottom: 20px; }
+
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    background: #161b22; 
+    border-radius: 4px; 
+    overflow: hidden; 
+}
+
+th, td { padding: 15px; border-bottom: 1px solid #30363d; }
+
+th { 
+    background: #001a33; 
+    color: #c5a059; 
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.unidades-lista {
+    color: #58a6ff;
+    font-family: monospace;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Terminal Operativa FFCCSE</h2>
+
+<form id="loginForm">
+    <input type="text" id="placa" placeholder="Introduce tu PLACA (Ej: CNP-203)" required>
+    <button type="submit">Entrar en servicio</button>
+</form>
+
+<div style="text-align:center;">
+    <button class="borrar" id="borrarPlaca" style="display:none;">Cambiar placa</button>
+</div>
+
+<table id="tablaPolicia" style="display:none;">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Ubicación</th>
+            <th>Explicación</th>
+            <th>Placas asignadas</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAkho8Wvxnygmbl0pRXKGUjBIIP3qyEtK8",
+    authDomain: "proyecto-erlc.firebaseapp.com",
+    databaseURL: "https://proyecto-erlc-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "proyecto-erlc",
+    storageBucket: "proyecto-erlc.firebasestorage.app",
+    messagingSenderId: "213209172438",
+    appId: "1:213209172438:web:63bdcca16bfad791263c77"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const loginForm = document.getElementById('loginForm');
+const tabla = document.getElementById('tablaPolicia');
+const tbody = tabla.querySelector('tbody');
+const borrarBtn = document.getElementById('borrarPlaca');
+
+let placaActual = localStorage.getItem('placa');
+
+if (placaActual) iniciarCentralita();
+
+loginForm.addEventListener('submit', e => {
+    e.preventDefault();
+    placaActual = document.getElementById('placa').value.trim().toUpperCase();
+    if (!placaActual) return;
+    localStorage.setItem('placa', placaActual);
+    iniciarCentralita();
+});
+
+borrarBtn.addEventListener('click', () => {
+    localStorage.removeItem('placa');
+    location.reload();
+});
+
+function iniciarCentralita() {
+    loginForm.style.display = 'none';
+    tabla.style.display = 'table';
+    borrarBtn.style.display = 'inline-block';
+    cargarLlamadas();
+}
+
+function limitePorPrioridad(p) {
+    return p === 'alta' ? 4 : p === 'media' ? 2 : 1;
+}
+
+function cargarLlamadas() {
+    onValue(ref(db, 'avisos'), snap => {
+        const avisos = snap.val() || {};
+        tbody.innerHTML = '';
+
+        Object.entries(avisos).forEach(([key, data]) => {
+            if (data.estado !== 'en_proceso') return;
+
+            const placas = data.unidadesAsignadas || [];
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td>#${data.numeroLlamada}</td>
+                <td>${data.nombre}</td>
+                <td>${data.ubicacion}</td>
+                <td>${data.explicacion}</td>
+                <td class="unidades-lista">${placas.join(', ')}</td>
+                <td>
+                    <button class="asignar">Acudir</button>
+                    <button class="finalizar">Finalizar</button>
+                </td>
+            `;
+
+            tr.querySelector('.asignar').onclick = () => {
+                if (placas.includes(placaActual)) return;
+                placas.push(placaActual);
+                update(ref(db, 'avisos/' + key), { unidadesAsignadas: placas });
+            };
+
+            tr.querySelector('.finalizar').onclick = () => {
+                if (confirm('¿Finalizar aviso?')) {
+                    update(ref(db, 'avisos/' + key), { estado: 'finalizado' });
+                }
+            };
+
+            tbody.appendChild(tr);
+        });
+    });
+}
+</script>
+
+</body>
+</html>
