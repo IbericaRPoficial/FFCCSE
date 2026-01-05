@@ -216,20 +216,22 @@ function verificar(){
     modal.style.display="flex";
     content.style.width="85%";
     content.style.height="90%";
-    fetch("infiltrado.html").then(r=>r.text()).then(html=>body.innerHTML=html);
+    fetch("cniagente.html").then(r=>r.text()).then(html=>body.innerHTML=html);
   }
   else if(pass==="OpCNI@2025"){
     cerrarAuth(); modal.style.display="flex";
     mostrarPaneles([
       {title:"CONTRASEÑAS",icon:"📁",desc:"Acceso operativo",file:"contraseñas.html"},
       {title:"Informes CNI",icon:"📁",desc:"Acceso técnico",file:"informescni.html"},
+      {title:"OperaivoInfiltrado",icon:"🕵️‍♂️",desc:"Unidad de control infiltracion",file:"cniviewer.html"},
       {title:"Oficializador CNI",icon:"📁",desc:"Acceso estratégico",file:"oficializadorcni.html"}
     ]);
   }
   else if(pass==="RootCNI!2025"){
     cerrarAuth(); modal.style.display="flex";
     mostrarPaneles([
-      {title:"Infiltrados",icon:"🔐",desc:"Unidad encubierta",file:"infiltrado.html"},
+      {title:"Infiltrados",icon:"🔐",desc:"Unidad encubierta",file:"cniagente.html"},
+      {title:"OperaivoInfiltrado",icon:"🕵️‍♂️",desc:"Unidad de control infiltracion",file:"cniviewer.html"},
       {title:"CONTRASEÑAS",icon:"📁",desc:"Acceso operativo",file:"contraseñas.html"},
       {title:"Informes CNI",icon:"📁",desc:"Acceso técnico",file:"informescni.html"},
       {title:"Oficializador CNI",icon:"📁",desc:"Acceso estratégico",file:"oficializadorcni.html"}
@@ -256,4 +258,5 @@ function abrirPanel(archivo){
 
 </body>
 </html>
+
 
