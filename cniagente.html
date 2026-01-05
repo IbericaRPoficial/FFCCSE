@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agente Infiltrado - Línea Segura</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #1b262f;
+      color: #f1f1f1;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #0d1318;
+      padding: 15px;
+      text-align: center;
+      border-bottom: 2px solid #d9af5d;
+    }
+
+    h1 {
+      margin: 0;
+      color: #d9af5d;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 20px;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .box {
+      flex: 1 1 300px;
+      background: #2a3b47;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .box:hover {
+      transform: scale(1.02);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #d9af5d;
+      border-bottom: 1px solid #3c4d5a;
+      padding-bottom: 6px;
+      font-size: 1.3rem;
+    }
+
+    textarea, input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: none;
+      background: #1b262f;
+      color: #fff;
+      font-size: 0.95rem;
+      resize: none;
+    }
+
+    textarea:focus, input:focus {
+      outline: 2px solid #d9af5d;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin-top: 5px;
+      background: #d9af5d;
+      color: #1b262f;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background: #c89c4f;
+    }
+
+    #panicBtn {
+      width: 100%;
+      background: #d92020;
+      color: white;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #panicBtn:hover {
+      background: #b31717;
+    }
+
+    #chatBox {
+      height: 220px;
+      overflow-y: auto;
+      background: #1b262f;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #3c4d5a;
+      font-size: 0.9rem;
+    }
+
+    #chatBox p {
+      margin: 5px 0;
+      padding: 6px 8px;
+      background: #364857;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Línea Segura - Agente</h1>
+  </header>
+
+  <div class="container">
+    <!-- Chat seguro -->
+    <div class="box">
+      <h2>Chat</h2>
+      <div id="chatBox"></div>
+      <input type="text" id="chatInput" placeholder="Escribe un mensaje...">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+
+    <!-- Informes -->
+    <div class="box">
+      <h2>Nuevo Informe</h2>
+      <textarea id="reportInput" rows="6" placeholder="Escribe el informe..."></textarea>
+      <button onclick="sendReport()">Subir Informe</button>
+    </div>
+
+    <!-- Botón de Pánico -->
+    <div class="box">
+      <h2>Alerta</h2>
+      <button id="panicBtn" onclick="panicAlert()">🚨 ¡Botón de Pánico!</button>
+    </div>
+  </div>
+
+  <!-- 🔊 Solo sonido de notificación -->
+  <audio id="notifSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCztapXvxmUZ3jsabWZmwr-hzZHbn7Iy8U",
+      authDomain: "cniibericarp.firebaseapp.com",
+      databaseURL: "https://cniibericarp-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "cniibericarp",
+      storageBucket: "cniibericarp.appspot.com",
+      messagingSenderId: "173570090088",
+      appId: "1:173570090088:web:061c1ba3ad015c5ec4c7dd",
+      measurementId: "G-P48XQC412D"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database(
+      app,
+      "https://cniibericarp-default-rtdb.europe-west1.firebasedatabase.app"
+    );
+
+    const chatRef = db.ref("linea_segura");
+    const reportRef = db.ref("informes");
+    const panicRef = db.ref("alertas_panico");
+
+    const notifSound = document.getElementById("notifSound");
+
+    // 🔹 Guardar nombre en localStorage
+    let username = localStorage.getItem("username");
+    if(!username){
+      while(!username){
+        username = prompt("Introduce tu nombre para el chat:");
+      }
+      localStorage.setItem("username", username);
+    }
+    document.querySelector("header h1").textContent = "Línea Segura - " + username;
+
+    // Enviar mensaje
+    function sendMessage() {
+      const msg = document.getElementById("chatInput").value;
+      if (msg.trim() !== "") {
+        chatRef.push({
+          mensaje: "👺 " + username + ": " + msg,
+          timestamp: Date.now()
+        });
+        document.getElementById("chatInput").value = "";
+      }
+    }
+
+    // Recibir mensajes
+    chatRef.on("child_added", snap => {
+      const data = snap.val();
+      const chatBox = document.getElementById("chatBox");
+      const p = document.createElement("p");
+      p.textContent = data.mensaje;
+      chatBox.appendChild(p);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      notifSound.play().catch(()=>{});
+    });
+
+    // Enviar informe
+    function sendReport() {
+      const report = document.getElementById("reportInput").value;
+      if (report.trim() !== "") {
+        reportRef.push({
+          informe: "📝 " + report,
+          timestamp: Date.now()
+        });
+        document.getElementById("reportInput").value = "";
+        alert("✅ Informe enviado con éxito");
+      }
+    }
+
+    // Botón de pánico (sin sonido)
+    function panicAlert() {
+      panicRef.set({
+        activo: true,
+        timestamp: Date.now()
+      });
+      alert("🚨 Alerta de pánico enviada");
+    }
+  </script>
+</body>
+</html>

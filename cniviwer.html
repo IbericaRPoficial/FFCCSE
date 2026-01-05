@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Centro de Control - Viewer</title>
+<style>
+body { font-family: 'Segoe UI', Arial, sans-serif; background:#10161d; color:#f1f1f1; margin:0; padding:0; }
+header { background:#0d1318; padding:15px; text-align:center; border-bottom:2px solid #d9af5d; }
+h1 { margin:0; color:#d9af5d; font-size:1.8rem; letter-spacing:1px; }
+.container { display:flex; flex-wrap:wrap; padding:20px; gap:20px; justify-content:center; }
+.box { flex:1 1 350px; background:#1b262f; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.4); transition:transform 0.2s ease-in-out; }
+.box:hover { transform:scale(1.02); }
+h2 { margin-top:0; color:#d9af5d; border-bottom:1px solid #3c4d5a; padding-bottom:6px; font-size:1.3rem; }
+#chatBox, #reportList { height:250px; overflow-y:auto; background:#10161d; padding:10px; border-radius:6px; border:1px solid #3c4d5a; font-size:0.9rem; }
+#chatBox p, #reportList p { margin:5px 0; padding:6px 8px; background:#2a3b47; border-radius:6px; }
+#chatForm { margin-top:10px; display:flex; gap:8px; }
+#chatInput { flex:1; padding:8px; border-radius:6px; border:none; outline:none; background:#10161d; color:#f1f1f1; border:1px solid #3c4d5a; }
+#chatSend { padding:8px 14px; border:none; border-radius:6px; background:#d9af5d; color:black; font-weight:bold; cursor:pointer; }
+#panicAlert { display:none; text-align:center; font-size:1.4rem; font-weight:bold; color:white; padding:20px; border-radius:12px; background:#d92020; animation:blink 1s infinite; }
+#panicStop { display:none; margin-top:15px; padding:10px; width:100%; border:none; border-radius:6px; background:#d9af5d; color:black; font-weight:bold; cursor:pointer; }
+@keyframes blink {0%{background:#d92020;}50%{background:#b31717;}100%{background:#d92020;}}
+</style>
+</head>
+<body>
+<header><h1>Centro de Control</h1></header>
+
+<div class="container">
+  <!-- Chat -->
+  <div class="box">
+    <h2>Chat de Agentes</h2>
+    <div id="chatBox"></div>
+    <form id="chatForm">
+      <input type="text" id="chatInput" placeholder="Escribe un mensaje..." required>
+      <button id="chatSend" type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <!-- Informes -->
+  <div class="box">
+    <h2>Informes Recibidos</h2>
+    <div id="reportList"></div>
+  </div>
+
+  <!-- Alerta -->
+  <div class="box">
+    <h2>Alerta</h2>
+    <div id="panicAlert">🚨 ¡BOTÓN DE PÁNICO ACTIVADO!</div>
+    <button id="panicStop">🔕 Parar Pánico</button>
+  </div>
+</div>
+
+<!-- Audios -->
+<audio id="panicSound" src="https://www.soundjay.com/buttons/sounds/beep-04.mp3" preload="auto"></audio>
+<audio id="notifSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" preload="auto"></audio>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCztapXvxmUZ3jsabWZmwr-hzZHbn7Iy8U",
+  authDomain: "cniibericarp.firebaseapp.com",
+  databaseURL: "https://cniibericarp-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "cniibericarp",
+  storageBucket: "cniibericarp.appspot.com",
+  messagingSenderId: "173570090088",
+  appId: "1:173570090088:web:061c1ba3ad015c5ec4c7dd",
+  measurementId: "G-P48XQC412D"
+};
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database(app);
+
+const chatRef = db.ref("linea_segura");
+const reportRef = db.ref("informes");
+const panicRef = db.ref("alertas_panico");
+
+const chatBox = document.getElementById("chatBox");
+const reportList = document.getElementById("reportList");
+const panicAlert = document.getElementById("panicAlert");
+const panicStop = document.getElementById("panicStop");
+
+const panicSound = document.getElementById("panicSound");
+const notifSound = document.getElementById("notifSound");
+
+let alarmUnlocked = false;
+
+// 🔹 Guardar nombre en localStorage
+let username = localStorage.getItem("username");
+if(!username){
+  while(!username){
+    username = prompt("Introduce tu nombre para el chat:");
+  }
+  localStorage.setItem("username", username);
+}
+document.querySelector("header h1").textContent = "Centro de Control - " + username;
+
+// Desbloquear audio con primer click
+document.body.addEventListener("click", ()=>{ alarmUnlocked = true; }, {once:true});
+
+// Pánico en bucle
+panicRef.on("value", snap=>{
+  const data = snap.val();
+  if(data && data.activo){
+    panicAlert.style.display="block";
+    panicStop.style.display="block";
+    if(alarmUnlocked){
+      panicSound.loop = true;
+      panicSound.play().catch(()=>{ console.log("Audio bloqueado"); });
+    }
+  } else {
+    panicAlert.style.display="none";
+    panicStop.style.display="none";
+    panicSound.pause();
+    panicSound.currentTime=0;
+  }
+});
+
+// Detener pánico
+panicStop.addEventListener("click", ()=>{
+  panicRef.set({activo:false});
+});
+
+// Chat en vivo
+chatRef.on("child_added", snap=>{
+  const data = snap.val();
+  const p = document.createElement("p");
+  p.textContent = data.mensaje || '';
+  chatBox.appendChild(p);
+  chatBox.scrollTop = chatBox.scrollHeight;
+  notifSound.play().catch(()=>{});
+});
+
+// Enviar mensaje
+document.getElementById("chatForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const input = document.getElementById("chatInput");
+  const mensaje = "🕴️ " + username + ": " + input.value;
+  chatRef.push({mensaje, timestamp:Date.now()});
+  input.value="";
+});
+
+// Informes en vivo
+reportRef.on("child_added", snap=>{
+  const data = snap.val();
+  const p = document.createElement("p");
+  p.textContent = "📝 "+(data.informe||'');
+  reportList.appendChild(p);
+  reportList.scrollTop = reportList.scrollHeight;
+  notifSound.play().catch(()=>{});
+});
+</script>
+</body>
+</html>
