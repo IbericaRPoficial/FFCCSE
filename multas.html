@@ -16,12 +16,16 @@ body{ background:#cfcfcf; font-family: Arial, sans-serif; margin:0; }
 .grid-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 label{ font-size:11px; font-weight:bold; }
 input, textarea, select{ width:100%; padding:6px; font-size:12px; border:1px solid #777; border-radius:3px; box-sizing: border-box;}
-canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-action:none; }
+canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-action:none; transition: background 0.3s; }
 .btn{ padding:8px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; margin-top: 5px; }
 .btn-primary{background:#003b8f;color:#fff; width: 100%; padding: 15px; font-size: 16px;}
 .btn-danger{background:#8b0000;color:#fff}
 .btn-success{background:#28a745;color:#fff}
 .code-badge { float: right; background: #444; padding: 0px 8px; border-radius: 4px; font-size: 10px; color: #fff; }
+
+.checkbox-negativa { margin-top: 10px; display: flex; align-items: center; gap: 8px; background: #f9f9f9; padding: 5px; border-radius: 4px; border: 1px solid #ddd; }
+.checkbox-negativa input { width: 18px; height: 18px; cursor: pointer; }
+.checkbox-negativa label { color: #8b0000; cursor: pointer; }
 
 @media (max-width: 600px) { .grid-firmas { grid-template-columns: 1fr; } }
 </style>
@@ -93,6 +97,11 @@ canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-
                 <canvas id="firmaCiudadano"></canvas>
                 <button class="btn btn-success" id="btnLoadFirma">Cargar Remota</button>
                 <button class="btn btn-danger" onclick="limpiar('firmaCiudadano')">Limpiar</button>
+                
+                <div class="checkbox-negativa">
+                    <input type="checkbox" id="negativaFirma" onclick="manejarNegativaFirma()">
+                    <label for="negativaFirma">Negativa a firmar / Imposibilidad</label>
+                </div>
             </div>
             <div>
                 <h3>FIRMA DEL AGENTE</h3>
@@ -136,6 +145,9 @@ const currentCode = Math.floor(1000 + Math.random() * 9000).toString();
 document.getElementById('randomCode').innerText = currentCode;
 
 document.getElementById('btnLoadFirma').onclick = async () => {
+    // Si está marcada la negativa, no permitimos cargar firma remota
+    if(document.getElementById('negativaFirma').checked) return;
+
     const dbRef = ref(db);
     try {
         const snapshot = await get(child(dbRef, `drawings/${currentCode}`));
@@ -154,7 +166,7 @@ document.getElementById('btnLoadFirma').onclick = async () => {
 </script>
 
 <script>
-// Lógica de Expediente y Canvas (Igual que antes)
+// Lógica de Expediente y Canvas
 let n = localStorage.getItem("expedienteDT") || 1000;
 n++;
 localStorage.setItem("expedienteDT", n);
@@ -175,16 +187,45 @@ function prepararCanvasFirma(id){
         const cY = e.touches ? e.touches[0].clientY : e.clientY;
         return { x: cX - r.left, y: cY - r.top };
     };
-    canvas.addEventListener("mousedown", (e) => { dibujando = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener("mousedown", (e) => { 
+        if(canvas.style.pointerEvents === "none") return;
+        dibujando = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); 
+    });
     canvas.addEventListener("mousemove", (e) => { if(dibujando){ const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
     window.addEventListener("mouseup", () => dibujando = false);
-    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); dibujando=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); }, {passive:false});
+    canvas.addEventListener("touchstart", (e) => { 
+        if(canvas.style.pointerEvents === "none") return;
+        e.preventDefault(); dibujando=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); 
+    }, {passive:false});
     canvas.addEventListener("touchmove", (e) => { e.preventDefault(); if(dibujando){ const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); } }, {passive:false});
 }
 
 function limpiar(id){
     const c = document.getElementById(id);
     c.getContext("2d").clearRect(0,0,c.width,c.height);
+}
+
+function manejarNegativaFirma() {
+    const checkbox = document.getElementById('negativaFirma');
+    const canvas = document.getElementById('firmaCiudadano');
+    const ctx = canvas.getContext('2d');
+    
+    if (checkbox.checked) {
+        limpiar('firmaCiudadano');
+        ctx.fillStyle = "#8b0000";
+        ctx.font = "bold 16px Arial";
+        ctx.textAlign = "center";
+        // Dibujamos el texto en el canvas
+        const xPos = canvas.width / (2 * (window.devicePixelRatio || 1));
+        ctx.fillText("EL DENUNCIADO SE NIEGA A FIRMAR", xPos, 60);
+        ctx.fillText("O EXISTE IMPOSIBILIDAD FÍSICA", xPos, 85);
+        canvas.style.pointerEvents = "none";
+        canvas.style.backgroundColor = "#fce8e8";
+    } else {
+        limpiar('firmaCiudadano');
+        canvas.style.pointerEvents = "auto";
+        canvas.style.backgroundColor = "#fff";
+    }
 }
 
 prepararCanvasFirma("firmaCiudadano");
@@ -213,7 +254,6 @@ async function generarPDF() {
     pdf.text("EXPEDIENTE Nº: DT-" + n, margin, y);
     y += 10;
 
-    // Función auxiliar para secciones
     const drawSection = (title, data) => {
         pdf.setFillColor(240, 240, 240);
         pdf.rect(margin, y, 180, 7, 'F');
@@ -271,15 +311,22 @@ async function generarPDF() {
     const imgFirmaC = document.getElementById("firmaCiudadano").toDataURL("image/png");
     const imgFirmaA = document.getElementById("firmaAgente").toDataURL("image/png");
     
-    pdf.rect(margin, y + 2, 80, 35); // Recuadro firma ciudadano
-    pdf.rect(110, y + 2, 80, 35);   // Recuadro firma agente
+    pdf.rect(margin, y + 2, 80, 35); 
+    pdf.rect(110, y + 2, 80, 35);   
     
     pdf.addImage(imgFirmaC, "PNG", margin + 5, y + 5, 70, 25);
     pdf.addImage(imgFirmaA, "PNG", 115, y + 5, 70, 25);
+
+    // Si hay negativa, añadimos nota aclaratoria al final
+    if(document.getElementById('negativaFirma').checked) {
+        y += 45;
+        pdf.setFontSize(9);
+        pdf.setTextColor(150, 0, 0);
+        pdf.text("DILIGENCIA: Se hace constar la negativa a firmar o imposibilidad del denunciado.", margin, y);
+    }
 
     pdf.save("Denuncia_DT-" + n + ".pdf");
 }
 </script>
 </body>
 </html>
-
