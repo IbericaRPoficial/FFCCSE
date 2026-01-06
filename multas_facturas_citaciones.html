@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Boletín de Denuncia de Tráfico</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{ background:#cfcfcf; font-family: Arial, sans-serif; margin:0; }
+.container{ max-width:980px; margin:20px auto; background:#fff; padding:25px; border-radius:6px; box-shadow:0 0 18px rgba(0,0,0,.3); }
+.header{ text-align:center; border-bottom:4px double #000; padding-bottom:10px; }
+.header h1{ margin:0; font-size:22px; letter-spacing:1px; }
+.section{ margin-top:18px; }
+.section h3{ background:#000; color:#fff; font-size:13px; padding:6px 10px; margin:0 0 10px 0; }
+.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.grid-firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+label{ font-size:11px; font-weight:bold; }
+input, textarea, select{ width:100%; padding:6px; font-size:12px; border:1px solid #777; border-radius:3px; box-sizing: border-box;}
+canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-action:none; }
+.btn{ padding:8px 10px; font-size:12px; border:none; border-radius:4px; cursor:pointer; font-weight:bold; margin-top: 5px; }
+.btn-primary{background:#003b8f;color:#fff; width: 100%; padding: 15px; font-size: 16px;}
+.btn-danger{background:#8b0000;color:#fff}
+.btn-success{background:#28a745;color:#fff}
+.code-badge { float: right; background: #444; padding: 0px 8px; border-radius: 4px; font-size: 10px; color: #fff; }
+
+@media (max-width: 600px) { .grid-firmas { grid-template-columns: 1fr; } }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>BOLETÍN DE DENUNCIA DE TRÁFICO</h1>
+        <p>Documento Administrativo · Fuerzas y Cuerpos de Seguridad</p>
+        <strong>Nº Expediente: <span id="numExp"></span></strong>
+    </div>
+
+    <div class="section">
+        <h3>DATOS DEL EXPEDIENTE</h3>
+        <div class="grid">
+            <div><label>Fecha</label><input type="date" id="fecha"></div>
+            <div><label>Hora</label><input type="time" id="hora"></div>
+            <div><label>Lugar exacto</label><input id="lugar"></div>
+            <div><label>Municipio</label><input id="municipio"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>CONDUCTOR / TITULAR</h3>
+        <div class="grid">
+            <div><label>Nombre completo</label><input id="nombre"></div>
+            <div><label>DNI / NIE</label><input id="dni"></div>
+            <div><label>Domicilio</label><input id="domicilio"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>VEHÍCULO</h3>
+        <div class="grid">
+            <div><label>Matrícula</label><input id="matricula"></div>
+            <div><label>Marca / Modelo</label><input id="vehiculo"></div>
+            <div><label>Color</label><input id="color"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>INFRACCIÓN DENUNCIADA</h3>
+        <div class="grid">
+            <div><label>Precepto infringido</label><input id="articulo"></div>
+            <div>
+                <label>Gravedad</label>
+                <select id="tipo">
+                    <option>Leve</option>
+                    <option>Media</option>
+                    <option>Grave</option>
+                    <option>Muy Grave</option>
+                </select>
+            </div>
+            <div><label>Importe (€)</label><input id="importe"></div>
+            <div><label>Puntos</label><input id="puntos"></div>
+        </div>
+        <div style="margin-top:10px;">
+            <label>Hechos observados</label>
+            <textarea id="hechos" rows="4"></textarea>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="grid-firmas">
+            <div>
+                <h3>FIRMA DENUNCIADO <span class="code-badge">ID: <span id="randomCode">....</span></span></h3>
+                <canvas id="firmaCiudadano"></canvas>
+                <button class="btn btn-success" id="btnLoadFirma">Cargar Remota</button>
+                <button class="btn btn-danger" onclick="limpiar('firmaCiudadano')">Limpiar</button>
+            </div>
+            <div>
+                <h3>FIRMA DEL AGENTE</h3>
+                <canvas id="firmaAgente"></canvas>
+                <button class="btn btn-danger" onclick="limpiar('firmaAgente')">Limpiar Firma Agente</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>DATOS DEL AGENTE</h3>
+        <div class="grid">
+            <div><label>Nº Placa</label><input id="placa"></div>
+            <div><label>Unidad</label><input id="unidad"></div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-primary" onclick="generarPDF()">GENERAR PDF OFICIAL PROFESIONAL</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAsAVsv0iwnv4cdDNkSyo1jBIYvCyn_pCY",
+    authDomain: "rascay-d6d3d.firebaseapp.com",
+    databaseURL: "https://rascay-d6d3d-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "rascay-d6d3d",
+    storageBucket: "rascay-d6d3d.firebasestorage.app",
+    appId: "1:991120220829:web:15c8dfa4677f701e582a74"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const currentCode = Math.floor(1000 + Math.random() * 9000).toString();
+document.getElementById('randomCode').innerText = currentCode;
+
+document.getElementById('btnLoadFirma').onclick = async () => {
+    const dbRef = ref(db);
+    try {
+        const snapshot = await get(child(dbRef, `drawings/${currentCode}`));
+        if (snapshot.exists()) {
+            const canvas = document.getElementById('firmaCiudadano');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
+            };
+            img.src = snapshot.val().imageB64;
+        } else { alert("Código no encontrado."); }
+    } catch (e) { console.error(e); }
+};
+</script>
+
+<script>
+// Lógica de Expediente y Canvas (Igual que antes)
+let n = localStorage.getItem("expedienteDT") || 1000;
+n++;
+localStorage.setItem("expedienteDT", n);
+document.getElementById("numExp").textContent = "DT-" + n;
+
+function prepararCanvasFirma(id){
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext("2d");
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * ratio; canvas.height = rect.height * ratio;
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2; ctx.lineCap = "round";
+    let dibujando = false;
+    const getPos = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const cX = e.touches ? e.touches[0].clientX : e.clientX;
+        const cY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: cX - r.left, y: cY - r.top };
+    };
+    canvas.addEventListener("mousedown", (e) => { dibujando = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener("mousemove", (e) => { if(dibujando){ const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
+    window.addEventListener("mouseup", () => dibujando = false);
+    canvas.addEventListener("touchstart", (e) => { e.preventDefault(); dibujando=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); }, {passive:false});
+    canvas.addEventListener("touchmove", (e) => { e.preventDefault(); if(dibujando){ const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); } }, {passive:false});
+}
+
+function limpiar(id){
+    const c = document.getElementById(id);
+    c.getContext("2d").clearRect(0,0,c.width,c.height);
+}
+
+prepararCanvasFirma("firmaCiudadano");
+prepararCanvasFirma("firmaAgente");
+
+// --- GENERACIÓN DE PDF PROFESIONAL ---
+async function generarPDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+    const margin = 15;
+    let y = 20;
+
+    // Encabezado
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(16);
+    pdf.text("BOLETÍN DE DENUNCIA DE TRÁFICO", 105, y, { align: "center" });
+    y += 8;
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text("Documento Administrativo · Fuerzas y Cuerpos de Seguridad", 105, y, { align: "center" });
+    y += 10;
+    pdf.line(margin, y, 210 - margin, y);
+    y += 8;
+
+    pdf.setFont("helvetica", "bold");
+    pdf.text("EXPEDIENTE Nº: DT-" + n, margin, y);
+    y += 10;
+
+    // Función auxiliar para secciones
+    const drawSection = (title, data) => {
+        pdf.setFillColor(240, 240, 240);
+        pdf.rect(margin, y, 180, 7, 'F');
+        pdf.setFont("helvetica", "bold");
+        pdf.text(title, margin + 2, y + 5);
+        y += 12;
+        pdf.setFont("helvetica", "normal");
+        data.forEach(item => {
+            pdf.setFont("helvetica", "bold");
+            pdf.text(item[0] + ":", margin, y);
+            pdf.setFont("helvetica", "normal");
+            pdf.text(item[1] || "---", margin + 40, y);
+            y += 6;
+        });
+        y += 5;
+    };
+
+    drawSection("DATOS DEL HECHO", [
+        ["Fecha y Hora", document.getElementById("fecha").value + " / " + document.getElementById("hora").value],
+        ["Lugar", document.getElementById("lugar").value],
+        ["Municipio", document.getElementById("municipio").value]
+    ]);
+
+    drawSection("IDENTIFICACIÓN DEL CONDUCTOR", [
+        ["Nombre", document.getElementById("nombre").value],
+        ["DNI/NIE", document.getElementById("dni").value],
+        ["Domicilio", document.getElementById("domicilio").value]
+    ]);
+
+    drawSection("VEHÍCULO", [
+        ["Matrícula", document.getElementById("matricula").value],
+        ["Marca/Modelo", document.getElementById("vehiculo").value],
+        ["Color", document.getElementById("color").value]
+    ]);
+
+    drawSection("DATOS DE LA INFRACCIÓN", [
+        ["Precepto", document.getElementById("articulo").value],
+        ["Gravedad", document.getElementById("tipo").value],
+        ["Importe", document.getElementById("importe").value + " €"],
+        ["Puntos", document.getElementById("puntos").value]
+    ]);
+
+    pdf.setFont("helvetica", "bold");
+    pdf.text("HECHOS OBSERVADOS:", margin, y); y += 5;
+    pdf.setFont("helvetica", "normal");
+    const hechosTxt = pdf.splitTextToSize(document.getElementById("hechos").value, 180);
+    pdf.text(hechosTxt, margin, y);
+    y += (hechosTxt.length * 5) + 15;
+
+    // Firmas
+    pdf.setFont("helvetica", "bold");
+    pdf.text("FIRMA DEL DENUNCIADO", margin + 15, y);
+    pdf.text("FIRMA DEL AGENTE ("+document.getElementById("placa").value+")", 125, y);
+    
+    const imgFirmaC = document.getElementById("firmaCiudadano").toDataURL("image/png");
+    const imgFirmaA = document.getElementById("firmaAgente").toDataURL("image/png");
+    
+    pdf.rect(margin, y + 2, 80, 35); // Recuadro firma ciudadano
+    pdf.rect(110, y + 2, 80, 35);   // Recuadro firma agente
+    
+    pdf.addImage(imgFirmaC, "PNG", margin + 5, y + 5, 70, 25);
+    pdf.addImage(imgFirmaA, "PNG", 115, y + 5, 70, 25);
+
+    pdf.save("Denuncia_DT-" + n + ".pdf");
+}
+</script>
+</body>
+</html>
