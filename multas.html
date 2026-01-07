@@ -35,7 +35,7 @@ canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-
 
 <div class="container">
     <div class="header">
-        <h1>BOLETÍN DE DENUNCIA DE TRÁFICO</h1>
+        <h1>BOLETÍN DE MULTA</h1>
         <p>Documento Administrativo · Fuerzas y Cuerpos de Seguridad</p>
         <strong>Nº Expediente: <span id="numExp"></span></strong>
     </div>
@@ -43,57 +43,70 @@ canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-
     <div class="section">
         <h3>DATOS DEL EXPEDIENTE</h3>
         <div class="grid">
-            <div><label>Fecha</label><input type="date" id="fecha"></div>
-            <div><label>Hora</label><input type="time" id="hora"></div>
-            <div><label>Lugar exacto</label><input id="lugar"></div>
-            <div><label>Municipio</label><input id="municipio"></div>
+            <div><label>Fecha</label><input type="date" id="fecha" placeholder="dd/mm/aaaa"></div>
+            <div><label>Hora</label><input type="time" id="hora" placeholder="hh:mm"></div>
+            <div><label>Lugar exacto (Muy preciso)</label><input id="lugar" placeholder="Granjas 601 - Frente la Gasolinera"></div>
+            <div><label>Nº Servicios</label><input id="municipio" placeholder="2-Sanitarios 1-GC 2-CNP"></div>
         </div>
     </div>
 
     <div class="section">
         <h3>CONDUCTOR / TITULAR</h3>
         <div class="grid">
-            <div><label>Nombre completo</label><input id="nombre"></div>
-            <div><label>DNI / NIE</label><input id="dni"></div>
-            <div><label>Domicilio</label><input id="domicilio"></div>
+            <div><label>Nombre completo</label><input id="nombre" placeholder="Jose Carlos Garcia Marquez"></div>
+            <div><label>DNI / NIE</label><input id="dni" placeholder="12345678Z"></div>
+            <div><label>Domicilio</label><input id="domicilio" placeholder="Housing Surburb - 7054"></div>
         </div>
     </div>
 
     <div class="section">
         <h3>VEHÍCULO</h3>
         <div class="grid">
-            <div><label>Matrícula</label><input id="matricula"></div>
-            <div><label>Marca / Modelo</label><input id="vehiculo"></div>
-            <div><label>Color</label><input id="color"></div>
+            <div><label>Matrícula</label><input id="matricula" placeholder="ABC123"></div>
+            <div><label>Marca / Modelo</label><input id="vehiculo" placeholder="Chevlon Corvetta 2014"></div>
+            <div><label>Color</label><input id="color" placeholder="Blanco"></div>
         </div>
     </div>
 
     <div class="section">
         <h3>INFRACCIÓN DENUNCIADA</h3>
         <div class="grid">
-            <div><label>Precepto infringido</label><input id="articulo"></div>
+            <div><label>Precepto infringido (Articulos)</label><input id="articulo" placeholder="Art. 5.2 del Reglamento General de Circulación"></div>
             <div>
                 <label>Gravedad</label>
                 <select id="tipo">
                     <option>Leve</option>
-                    <option>Media</option>
+                    <option selected>Media</option>
                     <option>Grave</option>
                     <option>Muy Grave</option>
                 </select>
             </div>
-            <div><label>Importe (€)</label><input id="importe"></div>
-            <div><label>Puntos</label><input id="puntos"></div>
+            <div><label>Importe (€)</label><input id="importe" placeholder="200"></div>
+            <div><label>Puntos</label><input id="puntos" placeholder="4"></div>
         </div>
         <div style="margin-top:10px;">
             <label>Hechos observados</label>
-            <textarea id="hechos" rows="4"></textarea>
+            <textarea id="hechos" rows="4" placeholder="El conductor circulaba a una velocidad superior a la permitida en vía urbana limitada a 50 km/h, siendo detectado a 78 km/h mediante cinemómetro debidamente homologado. Los hechos fueron observados y verificados por el agente denunciante, procediendo a la detención del vehículo en condiciones de seguridad."></textarea>
         </div>
+    </div>
+
+    <div class="section">
+        <h3>DATOS DEL AGENTE</h3>
+        <div class="grid">
+            <div><label>Nº Placa</label><input id="placa" placeholder="CNP-XXX / GC-XXX"></div>
+            <div><label>Unidad</label><input id="unidad" placeholder="Z-XX / SIERRA-XX"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>DILIGENCIAS Y OBSERVACIONES</h3>
+        <textarea id="diligencias" rows="3" placeholder="Anotaciones adicionales, comportamiento del interesado, testigos..."></textarea>
     </div>
 
     <div class="section">
         <div class="grid-firmas">
             <div>
-                <h3>FIRMA DENUNCIADO <span class="code-badge">ID: <span id="randomCode">....</span></span></h3>
+                <h3>FIRMA DENUNCIADO <a href="https://ibericarpoficial.github.io/otros/firmar" target="_blank"><span  class="code-badge">ID: <span id="randomCode">....</span></a></span></h3>
                 <canvas id="firmaCiudadano"></canvas>
                 <button class="btn btn-success" id="btnLoadFirma">Cargar Remota</button>
                 <button class="btn btn-danger" onclick="limpiar('firmaCiudadano')">Limpiar</button>
@@ -107,19 +120,10 @@ canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-
                 <h3>FIRMA DEL AGENTE</h3>
                 <canvas id="firmaAgente"></canvas>
                 <button class="btn btn-danger" onclick="limpiar('firmaAgente')">Limpiar Firma Agente</button>
-            </div>
+            </div>   
         </div>
     </div>
-
-    <div class="section">
-        <h3>DATOS DEL AGENTE</h3>
-        <div class="grid">
-            <div><label>Nº Placa</label><input id="placa"></div>
-            <div><label>Unidad</label><input id="unidad"></div>
-        </div>
-    </div>
-
-    <div class="actions">
+           <div class="actions">
         <button class="btn btn-primary" onclick="generarPDF()">GENERAR PDF OFICIAL PROFESIONAL</button>
     </div>
 </div>
@@ -128,7 +132,7 @@ canvas{ width:100%; height:150px; border:1px solid #000; background:#fff; touch-
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, get, child, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAsAVsv0iwnv4cdDNkSyo1jBIYvCyn_pCY",
@@ -141,11 +145,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
 const currentCode = Math.floor(1000 + Math.random() * 9000).toString();
 document.getElementById('randomCode').innerText = currentCode;
 
+// FIRMA REMOTA
 document.getElementById('btnLoadFirma').onclick = async () => {
-    // Si está marcada la negativa, no permitimos cargar firma remota
     if(document.getElementById('negativaFirma').checked) return;
 
     const dbRef = ref(db);
@@ -163,15 +168,24 @@ document.getElementById('btnLoadFirma').onclick = async () => {
         } else { alert("Código no encontrado."); }
     } catch (e) { console.error(e); }
 };
+
+// EXPEDIENTE ÚNICO FIREBASE
+let expedienteActual = null;
+async function obtenerExpedienteActual() {
+    const counterRef = ref(db, 'counters/expedienteDT');
+    await runTransaction(counterRef, (current) => {
+        if (current === null) return 1000;
+        return current;
+    });
+    const snapshot = await get(counterRef);
+    expedienteActual = snapshot.val();
+    document.getElementById("numExp").textContent = "DT-" + expedienteActual;
+}
+obtenerExpedienteActual();
 </script>
 
 <script>
-// Lógica de Expediente y Canvas
-let n = localStorage.getItem("expedienteDT") || 1000;
-n++;
-localStorage.setItem("expedienteDT", n);
-document.getElementById("numExp").textContent = "DT-" + n;
-
+// --- LÓGICA DE FIRMAS ---
 function prepararCanvasFirma(id){
     const canvas = document.getElementById(id);
     const ctx = canvas.getContext("2d");
@@ -199,12 +213,10 @@ function prepararCanvasFirma(id){
     }, {passive:false});
     canvas.addEventListener("touchmove", (e) => { e.preventDefault(); if(dibujando){ const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); } }, {passive:false});
 }
-
 function limpiar(id){
     const c = document.getElementById(id);
     c.getContext("2d").clearRect(0,0,c.width,c.height);
 }
-
 function manejarNegativaFirma() {
     const checkbox = document.getElementById('negativaFirma');
     const canvas = document.getElementById('firmaCiudadano');
@@ -215,7 +227,6 @@ function manejarNegativaFirma() {
         ctx.fillStyle = "#8b0000";
         ctx.font = "bold 16px Arial";
         ctx.textAlign = "center";
-        // Dibujamos el texto en el canvas
         const xPos = canvas.width / (2 * (window.devicePixelRatio || 1));
         ctx.fillText("EL DENUNCIADO SE NIEGA A FIRMAR", xPos, 60);
         ctx.fillText("O EXISTE IMPOSIBILIDAD FÍSICA", xPos, 85);
@@ -227,106 +238,97 @@ function manejarNegativaFirma() {
         canvas.style.backgroundColor = "#fff";
     }
 }
-
 prepararCanvasFirma("firmaCiudadano");
 prepararCanvasFirma("firmaAgente");
 
-// --- GENERACIÓN DE PDF PROFESIONAL ---
+// --- GENERAR PDF ---
 async function generarPDF() {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p", "mm", "a4");
-    const margin = 15;
-    let y = 20;
 
-    // Encabezado
-    pdf.setFont("helvetica", "bold");
+    // INCREMENTO EXPEDIENTE FIREBASE
+    const counterRef = firebase.database().ref('counters/expedienteDT');
+    await runTransaction(counterRef, (current) => {
+        if (current === null) return 1000;
+        return current + 1;
+    });
+    const snapshot = await get(counterRef);
+    expedienteActual = snapshot.val();
+
+    const pdf = new jsPDF("p","mm","a4");
+    const margin=15;
+    let y=20;
+    pdf.setFont("helvetica","bold");
     pdf.setFontSize(16);
-    pdf.text("BOLETÍN DE DENUNCIA DE TRÁFICO", 105, y, { align: "center" });
-    y += 8;
+    pdf.text("BOLETÍN DE DENUNCIA DE TRÁFICO",105,y,{align:"center"});
+    y+=8;
     pdf.setFontSize(10);
-    pdf.setFont("helvetica", "normal");
-    pdf.text("Documento Administrativo · Fuerzas y Cuerpos de Seguridad", 105, y, { align: "center" });
-    y += 10;
-    pdf.line(margin, y, 210 - margin, y);
-    y += 8;
+    pdf.setFont("helvetica","normal");
+    pdf.text("Documento Administrativo · Fuerzas y Cuerpos de Seguridad",105,y,{align:"center"});
+    y+=10;
+    pdf.line(margin,y,210-margin,y);
+    y+=8;
+    pdf.setFont("helvetica","bold");
+    pdf.text("EXPEDIENTE Nº: DT-"+expedienteActual,margin,y);
+    y+=10;
 
-    pdf.setFont("helvetica", "bold");
-    pdf.text("EXPEDIENTE Nº: DT-" + n, margin, y);
-    y += 10;
-
-    const drawSection = (title, data) => {
-        pdf.setFillColor(240, 240, 240);
-        pdf.rect(margin, y, 180, 7, 'F');
-        pdf.setFont("helvetica", "bold");
-        pdf.text(title, margin + 2, y + 5);
-        y += 12;
-        pdf.setFont("helvetica", "normal");
-        data.forEach(item => {
-            pdf.setFont("helvetica", "bold");
-            pdf.text(item[0] + ":", margin, y);
-            pdf.setFont("helvetica", "normal");
-            pdf.text(item[1] || "---", margin + 40, y);
-            y += 6;
+    const drawSection=(title,data)=>{
+        pdf.setFillColor(240,240,240);
+        pdf.rect(margin,y,180,7,'F');
+        pdf.setFont("helvetica","bold");
+        pdf.text(title,margin+2,y+5);
+        y+=12;
+        pdf.setFont("helvetica","normal");
+        data.forEach(item=>{
+            pdf.setFont("helvetica","bold");
+            pdf.text(item[0]+":",margin,y);
+            pdf.setFont("helvetica","normal");
+            pdf.text(item[1]||"---",margin+40,y);
+            y+=6;
         });
-        y += 5;
+        y+=5;
     };
 
-    drawSection("DATOS DEL HECHO", [
-        ["Fecha y Hora", document.getElementById("fecha").value + " / " + document.getElementById("hora").value],
-        ["Lugar", document.getElementById("lugar").value],
-        ["Municipio", document.getElementById("municipio").value]
+    drawSection("DATOS DEL HECHO",[
+        ["Fecha y Hora",document.getElementById("fecha").value+" / "+document.getElementById("hora").value],
+        ["Lugar",document.getElementById("lugar").value],
+        ["Nº Servicios",document.getElementById("municipio").value]
+    ]);
+    drawSection("IDENTIFICACIÓN DEL CONDUCTOR",[
+        ["Nombre",document.getElementById("nombre").value],
+        ["DNI/NIE",document.getElementById("dni").value],
+        ["Domicilio",document.getElementById("domicilio").value]
+    ]);
+    drawSection("VEHÍCULO",[
+        ["Matrícula",document.getElementById("matricula").value],
+        ["Marca/Modelo",document.getElementById("vehiculo").value],
+        ["Color",document.getElementById("color").value]
+    ]);
+    drawSection("DATOS DE LA INFRACCIÓN",[
+        ["Precepto",document.getElementById("articulo").value],
+        ["Gravedad",document.getElementById("tipo").value],
+        ["Importe",document.getElementById("importe").value+" €"],
+        ["Puntos",document.getElementById("puntos").value]
     ]);
 
-    drawSection("IDENTIFICACIÓN DEL CONDUCTOR", [
-        ["Nombre", document.getElementById("nombre").value],
-        ["DNI/NIE", document.getElementById("dni").value],
-        ["Domicilio", document.getElementById("domicilio").value]
-    ]);
+    pdf.setFont("helvetica","bold");
+    pdf.text("HECHOS OBSERVADOS:",margin,y); y+=5;
+    pdf.setFont("helvetica","normal");
+    pdf.text(pdf.splitTextToSize(document.getElementById("hechos").value,180),margin,y);
+    y+=20;
 
-    drawSection("VEHÍCULO", [
-        ["Matrícula", document.getElementById("matricula").value],
-        ["Marca/Modelo", document.getElementById("vehiculo").value],
-        ["Color", document.getElementById("color").value]
-    ]);
+    pdf.text("DILIGENCIAS / OBSERVACIONES:",margin,y); y+=5;
+    pdf.setFont("helvetica","normal");
+    pdf.text(pdf.splitTextToSize(document.getElementById("diligencias").value,180),margin,y);
 
-    drawSection("DATOS DE LA INFRACCIÓN", [
-        ["Precepto", document.getElementById("articulo").value],
-        ["Gravedad", document.getElementById("tipo").value],
-        ["Importe", document.getElementById("importe").value + " €"],
-        ["Puntos", document.getElementById("puntos").value]
-    ]);
+    // FIRMA
+    const firmaC = document.getElementById("firmaCiudadano").toDataURL("image/png");
+    const firmaA = document.getElementById("firmaAgente").toDataURL("image/png");
+    pdf.addImage(firmaC,'PNG',margin, y+10, 80,40);
+    pdf.addImage(firmaA,'PNG',110, y+10, 80,40);
 
-    pdf.setFont("helvetica", "bold");
-    pdf.text("HECHOS OBSERVADOS:", margin, y); y += 5;
-    pdf.setFont("helvetica", "normal");
-    const hechosTxt = pdf.splitTextToSize(document.getElementById("hechos").value, 180);
-    pdf.text(hechosTxt, margin, y);
-    y += (hechosTxt.length * 5) + 15;
-
-    // Firmas
-    pdf.setFont("helvetica", "bold");
-    pdf.text("FIRMA DEL DENUNCIADO", margin + 15, y);
-    pdf.text("FIRMA DEL AGENTE ("+document.getElementById("placa").value+")", 125, y);
-    
-    const imgFirmaC = document.getElementById("firmaCiudadano").toDataURL("image/png");
-    const imgFirmaA = document.getElementById("firmaAgente").toDataURL("image/png");
-    
-    pdf.rect(margin, y + 2, 80, 35); 
-    pdf.rect(110, y + 2, 80, 35);   
-    
-    pdf.addImage(imgFirmaC, "PNG", margin + 5, y + 5, 70, 25);
-    pdf.addImage(imgFirmaA, "PNG", 115, y + 5, 70, 25);
-
-    // Si hay negativa, añadimos nota aclaratoria al final
-    if(document.getElementById('negativaFirma').checked) {
-        y += 45;
-        pdf.setFontSize(9);
-        pdf.setTextColor(150, 0, 0);
-        pdf.text("DILIGENCIA: Se hace constar la negativa a firmar o imposibilidad del denunciado.", margin, y);
-    }
-
-    pdf.save("Denuncia_DT-" + n + ".pdf");
+    pdf.save("DT-"+expedienteActual+".pdf");
 }
 </script>
+
 </body>
 </html>
