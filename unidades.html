@@ -1,292 +1,472 @@
-<!DOCTYPE html5>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>FFCCSE · Unidades Operativas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFCCSE · Panel Operativo Completo</title>
 
 <style>
 :root {
-    --bg-dark:#0a0c0f;
-    --bg-card:#161b22;
-    --bg-input:#0d1117;
-    --text-main:#e6edf3;
-    --text-muted:#8b949e;
-    --color-header:#001a33;
-    --color-accent:#c5a059;
-    --color-success:#238636;
-    --color-danger:#f85149;
-    --color-border:#30363d;
+    --bg-dark: #0a0c0f;
+    --bg-card: #161b22;
+    --bg-input: #0d1117;
+    --text-main: #e6edf3;
+    --text-muted: #8b949e;
+    
+    /* Bordes Cuerpos */
+    --cnp-border: #1f6feb;
+    --gc-border: #238636;
+    --common-border: #e3b341;
+    --color-border: #30363d;
 }
 
 body {
-    font-family:'Segoe UI',Roboto,sans-serif;
-    background:var(--bg-dark);
-    color:var(--text-main);
-    margin:0;
-    padding:20px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-h2 {
-    text-align:center;
-    border-bottom:2px solid var(--color-accent);
-    padding-bottom:12px;
-    margin-bottom:25px;
+/* === LAYOUT PRINCIPAL (Dos columnas: Unidades | Panel) === */
+.app-container {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    max-width: 1900px;
+    margin: 0 auto;
 }
 
-.contenedor {
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:20px;
+@media (max-width: 900px) { .app-container { grid-template-columns: 1fr; } }
+
+/* === HEADER === */
+header {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+}
+h2 { margin: 0; text-transform: uppercase; letter-spacing: 2px; color: var(--text-main); }
+
+/* === ZONA UNIDADES (IZQUIERDA) === */
+.units-area { display: flex; flex-direction: column; gap: 20px; }
+
+/* Sección Conjunta (Arriba) */
+.top-section {
+    border-left: 5px solid var(--common-border);
+    background: var(--bg-card);
+    border-radius: 6px;
+    padding: 15px;
 }
 
-.card {
-    background:var(--bg-card);
-    padding:18px;
-    border-radius:6px;
-    border-top:4px solid var(--color-header);
+/* Sección Dividida (CNP / GC) */
+.split-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+@media (max-width: 700px) { .split-section { grid-template-columns: 1fr; } }
+
+/* Columnas de Cuerpo */
+.col-org {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 15px;
+    border-top: 4px solid #333;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.col-cnp { border-color: var(--cnp-border); }
+.col-gc { border-color: var(--gc-border); }
+
+.col-title {
+    text-align: center; font-weight: bold; font-size: 1.1em;
+    padding-bottom: 10px; border-bottom: 1px solid var(--color-border);
+    margin-bottom: 5px; text-transform: uppercase;
 }
 
-/* === UNIDADES === */
+/* Cajas de Categoría (ej. Seguridad Ciudadana) */
 .unidad-base {
-    margin-bottom:25px;
-    border:1px solid var(--color-border);
-    border-radius:8px;
-    padding:15px;
-    background:#0f141b;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 10px;
+    background: #0d1117;
 }
-
 .unidad-base h3 {
-    margin:0 0 12px;
-    color:var(--color-accent);
-    border-bottom:1px solid var(--color-border);
+    margin: 0 0 10px; font-size: 0.85em; color: var(--text-muted);
+    border-bottom: 1px dashed var(--color-border); padding-bottom: 5px; text-transform: uppercase;
 }
 
 .sub-grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-    gap:10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
 }
 
+/* === CAJAS DE UNIDAD INDIVIDUALES === */
 .sub-box {
-    background:var(--bg-card);
-    border:1px solid var(--color-border);
-    border-radius:6px;
-    padding:8px;
-    text-align:center;
-    font-size:12px;
-    cursor:pointer;
+    background: #1f242c;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.sub-box:hover {
-    outline:2px solid var(--color-accent);
+.sub-box strong { display: block; margin-bottom: 3px; color: #fff; font-size: 11px; }
+
+/* === COLORES DE ESTADO (Lógica solicitada) === */
+.box-green {
+    border-color: #238636 !important;
+    background: rgba(35, 134, 54, 0.25) !important;
+}
+.box-red {
+    border-color: #da3633 !important;
+    background: rgba(218, 54, 51, 0.25) !important;
+}
+.box-yellow {
+    border-color: #d29922 !important;
+    background: rgba(210, 153, 34, 0.25) !important;
+}
+.sub-box:hover { filter: brightness(1.3); }
+
+.mini-badge {
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    margin-top: 2px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px #000;
 }
 
-.sub-box.libre { opacity:.5; }
-
-.sub-box.bloqueado { opacity:.35; pointer-events:none; }
-
-.estado {
-    padding:2px 6px;
-    border-radius:4px;
-    font-size:10px;
-    font-weight:bold;
-    text-transform:uppercase;
+/* === PANEL LATERAL (DERECHA) === */
+.sidebar {
+    background: var(--bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
 }
+.sidebar h3 { margin-top:0; color:var(--text-muted); font-size:0.9rem; text-transform:uppercase; border-bottom:1px solid var(--color-border); padding-bottom:10px; }
 
-.disponible { background:var(--color-success); }
-.ocupado { background:var(--color-danger); }
-
-/* === FORM === */
-input,select,button {
-    width:100%;
-    padding:10px;
-    margin-bottom:10px;
-    background:var(--bg-input);
-    border:1px solid var(--color-border);
-    color:white;
-    border-radius:4px;
+.status-display {
+    background: #0d1117; padding: 15px; border-radius: 4px;
+    margin-bottom: 20px; text-align: center; border: 1px solid var(--color-border);
 }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 12px; margin-bottom: 5px; color: var(--text-muted); }
 
-button {
-    background:var(--color-header);
-    border:1px solid var(--color-accent);
-    font-weight:bold;
+input, select, button {
+    width: 100%; padding: 12px; background: var(--bg-input);
+    border: 1px solid var(--color-border); color: white;
+    border-radius: 4px; box-sizing: border-box; font-size: 14px;
 }
+button { cursor: pointer; font-weight: bold; background: #1f6feb; border: none; margin-top: 5px; }
+button:hover { opacity: 0.9; }
+button.rojo { background: #da3633; margin-top: 10px; }
+button.gris { background: #30363d; margin-top: 10px; }
 
-button.rojo {
-    background:var(--color-danger);
-    border:none;
+.selected-unit-display {
+    margin-bottom: 15px; padding: 10px; background: rgba(31, 111, 235, 0.1);
+    border: 1px solid #1f6feb; border-radius: 4px; font-size: 0.9rem;
+    text-align: center; display: none; color: #58a6ff;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Unidades Operativas FFCCSE</h2>
+<div class="app-container">
+    
+    <header><h2>FFCCSE - OPERATIVO</h2></header>
 
-<div class="contenedor">
+    <div class="units-area">
+        
+        <div class="top-section" id="colComun">
+            <div class="col-title" style="color:#e3b341">Unidades Conjuntas</div>
+            </div>
 
-<div class="card">
-    <h3>Unidades en Servicio</h3>
-    <div id="lista"></div>
-</div>
+        <div class="split-section">
+            <div class="col-org col-cnp" id="colCNP">
+                <div class="col-title" style="color:#58a6ff">CNP</div>
+                </div>
+            <div class="col-org col-gc" id="colGC">
+                <div class="col-title" style="color:#3fb950">Guardia Civil</div>
+                </div>
+        </div>
 
-<div class="card">
-    <h3>Mi Unidad</h3>
-    <form id="formUnidad">
-        <input id="placa" placeholder="Placa" required>
-        <select id="unidadBase"></select>
-        <select id="subUnidad"></select>
-        <select id="estado">
-            <option value="disponible">Disponible</option>
-            <option value="ocupado">Ocupado</option>
-        </select>
-        <button type="submit">Guardar</button>
-        <button type="button" id="salir">Fuera de servicio</button>
-        <button type="button" id="cambiarPlaca" class="rojo">Cambiar placa</button>
-    </form>
-    <small id="info" style="color:var(--text-muted)"></small>
-</div>
+    </div>
+
+    <div class="sidebar">
+        <h3>Panel de Fichaje</h3>
+
+        <div class="status-display">
+            <div style="font-size:11px; color:#8b949e; margin-bottom:4px;">Tu Estado</div>
+            <div id="info" style="font-weight:bold; font-size:1.2rem; color:#fff;">Fuera de Servicio</div>
+        </div>
+
+        <form id="formUnidad">
+            <div id="selUnitDisplay" class="selected-unit-display"></div>
+
+            <div class="form-group">
+                <label>Número de Placa</label>
+                <input id="placa" placeholder="Ej: 1234" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>Estado del Agente</label>
+                <select id="estado">
+                    <option value="disponible">🟢 Disponible</option>
+                    <option value="ocupado">🔴 Ocupado</option>
+                </select>
+            </div>
+
+            <select id="unidadBase" style="display:none;"><option value="" disabled selected>Unidad</option></select>
+            <select id="subUnidad" style="display:none;"><option value="" disabled selected>Sub</option></select>
+            
+            <button type="submit">ENTRAR EN SERVICIO</button>
+            <button type="button" id="salir" class="gris" style="display:none;">SALIR</button>
+            <button type="button" id="cambiarPlaca" class="rojo">LIBERAR PLACA</button>
+        </form>
+    </div>
 
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, remove, get, update } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-const UNIDADES_CONFIG = {
-    "CONJUNTA":["1","2", "Operativo"],
-    "Z":["10","20","30","40","50","60","70"],
-    "K":["1","2","3","4", "Investigacion"],
-    "UIP":["1","2","3", "Operativo"],
-    "UPR":["1","2", "Operativo"],
-    "GEO":["1","2","Operativo"],
-    "GOES":["1","2", "Operativo"],
-    "JEFATURA":["H50","Mando","Despacho 1","Despacho 2"]
+/* === CONFIGURACIÓN COMPLETA === */
+// Aquí están todas las unidades que pediste
+
+const CONFIG_CONJUNTA = {
+    "CONJUNTO": ["Conjunto 1", "Conjunto 2", "Operativo"]
 };
 
+const CONFIG_CNP = {
+    "JEFATURA CNP": ["H50", "Mando", "Despacho", "Jefe Sala"],
+    "Z (Radio Patrulla)": ["Z-10","Z-20","Z-30","Z-40","Z-50","Z-60","Z-70"],
+    "K (Camuflado)": ["K-1","K-2","K-3","K-4", "Investigación"],
+    "UIP (Antidisturbios)": ["UIP 1","UIP 2","UIP 3", "Operativo"],
+    "UPR (Bronce)": ["Bronce 1","Bronce 2", "Operativo"],
+    "GEO": ["GEO 1", "GEO 2", "Operativo"],
+    "GOES": ["GOES 1", "GOES 2", "Operativo"],
+    "EXTRANJERÍA": ["Ext-1", "Ext-2"]
+};
+
+const CONFIG_GC = {
+    "JEFATURA GC": ["H50", "Mando", "Oficial"], 
+    "SEGURIDAD CIUDADANA": ["Patrulla 1", "Patrulla 2", "Patrulla 3", "Patrulla 4"],
+    "TRÁFICO": ["Motorista 1", "Motorista 2", "Atestados", "Radar", "Cot"],
+    "GRS": ["GRS 1", "GRS 2", "Operativo"],
+    "SEPRONA": ["Patrulla Rural", "Quad"],
+    "UEI": ["UEI 1", "Operativo"],
+    "POLICÍA JUDICIAL": ["PJ 1", "Laboratorio"]
+};
+
+const ALL_CONFIG = { ...CONFIG_CONJUNTA, ...CONFIG_CNP, ...CONFIG_GC };
+
 const app = initializeApp({
-    apiKey:"AIzaSyAkho8Wvxnygmbl0pRXKGUjBIIP3qyEtK8",
-    databaseURL:"https://proyecto-erlc-default-rtdb.europe-west1.firebasedatabase.app"
+    apiKey: "AIzaSyAkho8Wvxnygmbl0pRXKGUjBIIP3qyEtK8",
+    databaseURL: "https://proyecto-erlc-default-rtdb.europe-west1.firebasedatabase.app"
 });
 
 const db = getDatabase(app);
 
-const lista = document.getElementById("lista");
+// Variables DOM
+const colComun = document.getElementById("colComun");
+const colCNP = document.getElementById("colCNP");
+const colGC = document.getElementById("colGC");
+
 const placa = document.getElementById("placa");
 const selBase = document.getElementById("unidadBase");
 const selSub = document.getElementById("subUnidad");
 const estadoSel = document.getElementById("estado");
 const info = document.getElementById("info");
+const btnSalir = document.getElementById("salir");
+const selUnitDisplay = document.getElementById("selUnitDisplay");
 
 let miPlaca = localStorage.getItem("ffccse_placa");
 
-/* === SELECTORES === */
-for (const u in UNIDADES_CONFIG)
-    selBase.innerHTML += `<option value="${u}">${u}</option>`;
-
-function cargarSub() {
-    selSub.innerHTML = "";
-    UNIDADES_CONFIG[selBase.value].forEach(s =>
-        selSub.innerHTML += `<option value="${s}">${selBase.value} ${s}</option>`
-    );
+// Llenar select base oculto para validar
+function llenarSelectBase(){
+    selBase.innerHTML = "";
+    for(let k in ALL_CONFIG) selBase.innerHTML += `<option value="${k}">${k}</option>`;
 }
-selBase.onchange = cargarSub;
-cargarSub();
+llenarSelectBase();
 
-/* === RENDER UNIDADES Y CLICK === */
-onValue(ref(db,"unidades_ffccse"), snap => {
-    const data = snap.val() || {};
-    lista.innerHTML = "";
+// Función Principal de Renderizado
+function renderSection(config, container, dbData) {
+    const existing = container.querySelectorAll(".unidad-base");
+    existing.forEach(e => e.remove());
 
-    for (const base in UNIDADES_CONFIG) {
-        const baseDiv = document.createElement("div");
-        baseDiv.className = "unidad-base";
-        baseDiv.innerHTML = `<h3>${base}</h3>`;
+    for (const catName in config) {
+        const wrap = document.createElement("div");
+        wrap.className = "unidad-base";
+        wrap.innerHTML = `<h3>${catName}</h3>`;
 
         const grid = document.createElement("div");
         grid.className = "sub-grid";
 
-        UNIDADES_CONFIG[base].forEach(sub => {
+        config[catName].forEach(unitName => {
             const box = document.createElement("div");
-            box.className = "sub-box libre";
-            box.dataset.base = base;
-            box.dataset.sub = sub;
+            box.className = "sub-box";
+            
+            let content = `<strong>${unitName}</strong>`;
+            
+            // Contadores para color
+            let totalAgents = 0;
+            let countDisponible = 0;
+            let countOcupado = 0;
 
-            let html = `<strong>${base} ${sub}</strong><div>Libre</div>`;
-
-            if (data[base] && data[base][sub]) {
-                let content = `<strong>${base} ${sub}</strong>`;
-                for (const placaKey in data[base][sub]) {
-                    const estado = data[base][sub][placaKey].estado;
-                    content += `<div>${placaKey} <span class="estado ${estado}">${estado}</span></div>`;
+            if(dbData[catName] && dbData[catName][unitName]) {
+                const occupants = dbData[catName][unitName];
+                for(let p in occupants) {
+                    totalAgents++;
+                    const est = occupants[p].estado;
+                    if(est === 'disponible') countDisponible++;
+                    else countOcupado++;
+                    
+                    // Badge individual
+                    const colorBadge = est === 'ocupado' ? '#da3633' : '#238636';
+                    content += `<div class="mini-badge" style="background:${colorBadge}">${p}</div>`;
                 }
-                html = content;
+            } else {
+                content += `<div style="color:#444; font-size:10px;">Libre</div>`;
             }
 
-            box.innerHTML = html;
+            // APLICAR COLORES AL CUADRO
+            if(totalAgents > 0) {
+                if(countDisponible === totalAgents) {
+                    box.classList.add("box-green"); // Todos disponibles
+                } else if(countOcupado === totalAgents) {
+                    box.classList.add("box-red"); // Todos ocupados
+                } else {
+                    box.classList.add("box-yellow"); // Mezcla
+                }
+            }
 
-            /* CLICK PARA AUTO-SELECCIÓN */
+            box.innerHTML = content;
+
+            // Click Handler
             box.onclick = () => {
-                selBase.value = base;
-                cargarSub();
-                selSub.value = sub;
-                placa.focus();
+                selBase.value = catName;
+                selSub.innerHTML = "";
+                const opt = document.createElement("option");
+                opt.value = unitName;
+                opt.text = unitName;
+                opt.selected = true;
+                selSub.appendChild(opt);
+
+                // Feedback visual
+                selUnitDisplay.style.display = "block";
+                selUnitDisplay.innerHTML = `Seleccionado: <strong>${unitName}</strong>`;
+                
+                // Resaltar borde selección
+                document.querySelectorAll(".sub-box").forEach(b => b.style.outline = "none");
+                box.style.outline = "2px solid #facc15";
+
+                // Focus inteligente
+                if(miPlaca) document.querySelector("button[type='submit']").focus();
+                else placa.focus();
             };
 
             grid.appendChild(box);
         });
 
-        baseDiv.appendChild(grid);
-        lista.appendChild(baseDiv);
+        wrap.appendChild(grid);
+        container.appendChild(wrap);
     }
+}
+
+// Escuchar cambios en Firebase
+onValue(ref(db, "unidades_ffccse"), snap => {
+    const data = snap.val() || {};
+
+    renderSection(CONFIG_CONJUNTA, colComun, data);
+    renderSection(CONFIG_CNP, colCNP, data);
+    renderSection(CONFIG_GC, colGC, data);
 
     if (miPlaca) {
         placa.value = miPlaca;
         placa.disabled = true;
-        info.textContent = "Placa bloqueada.";
+        info.innerHTML = `<span style="color:#facc15">${miPlaca}</span>`;
+        btnSalir.style.display = "block";
+    } else {
+        info.textContent = "Fuera de Servicio";
+        btnSalir.style.display = "none";
     }
 });
 
-/* === GUARDAR === */
-formUnidad.onsubmit = async e => {
+// Entrar en servicio
+document.getElementById("formUnidad").onsubmit = async e => {
     e.preventDefault();
+    if(!selBase.value || !selSub.value) {
+        alert("⚠️ Selecciona una unidad en el panel izquierdo.");
+        return;
+    }
+
     if (!miPlaca) {
         miPlaca = placa.value.trim();
+        if(!miPlaca) return;
         localStorage.setItem("ffccse_placa", miPlaca);
     }
-    const refPath = `unidades_ffccse/${selBase.value}/${selSub.value}/${miPlaca}`;
-    await set(ref(db, refPath), {
-        estado:estadoSel.value,
-        ts:Date.now()
+
+    await salirDeTodo();
+
+    const path = `unidades_ffccse/${selBase.value}/${selSub.value}/${miPlaca}`;
+    await set(ref(db, path), {
+        estado: estadoSel.value,
+        timestamp: Date.now()
     });
+    
+    // Reset visual
+    selUnitDisplay.innerHTML = "✅ Asignado";
+    setTimeout(() => { selUnitDisplay.style.display = "none"; }, 2000);
+    document.querySelectorAll(".sub-box").forEach(b => b.style.outline = "none");
 };
 
-/* === FUERA DE SERVICIO SOLO MI PLACA === */
-salir.onclick = async () => {
-    if (!miPlaca) return;
-    const snap = await get(ref(db,"unidades_ffccse"));
-    const data = snap.val();
-    if (!data) return;
+// Salir de servicio
+async function salirDeTodo() {
+    if(!miPlaca) return;
+    const s = await get(ref(db, "unidades_ffccse"));
+    const d = s.val();
+    if(!d) return;
 
-    for (const base in data)
-        for (const sub in data[base])
-            if (data[base][sub][miPlaca]) {
-                await remove(ref(db,`unidades_ffccse/${base}/${sub}/${miPlaca}`));
-                return;
+    for(let base in d) {
+        for(let sub in d[base]) {
+            if(d[base][sub][miPlaca]) {
+                await remove(ref(db, `unidades_ffccse/${base}/${sub}/${miPlaca}`));
             }
+        }
+    }
+}
+
+btnSalir.onclick = async () => {
+    await salirDeTodo();
 };
 
-/* === CAMBIAR PLACA === */
-cambiarPlaca.onclick = () => {
-    localStorage.removeItem("ffccse_placa");
-    miPlaca = null;
-    placa.disabled = false;
-    placa.value = "";
-    info.textContent = "Introduce nueva placa";
+document.getElementById("cambiarPlaca").onclick = async () => {
+    if(confirm("¿Seguro que quieres liberar tu placa?")){
+        await salirDeTodo();
+        localStorage.removeItem("ffccse_placa");
+        miPlaca = null;
+        placa.disabled = false;
+        placa.value = "";
+        info.textContent = "Fuera de Servicio";
+        btnSalir.style.display = "none";
+    }
 };
+
 </script>
 
 </body>
 </html>
-
