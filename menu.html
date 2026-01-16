@@ -16,7 +16,7 @@ body { margin:0; font-family:'Segoe UI', Roboto, sans-serif; background-color:#0
 </head>
 <body>
 <div class="navbar">
-    <div class="logo"><i class="fas fa-shield-alt"></i> FFCCSE</div>
+    <div class="logo"><li onclick="parent.contenidoFrame.location.href='explicacion.html'"><i class="fas fa-shield-alt"></i> FFCCSE</div>
     <ul class="menu">
         <li onclick="parent.contenidoFrame.location.href='inicio.html'"><i class="fas fa-home"> </i> Inicio</li>
         <li onclick="parent.contenidoFrame.location.href='centralita.html'"><i class="fas fa-bell"> </i> Avisos <span id="notif" class="badge">0</span></li>
@@ -54,4 +54,5 @@ onValue(avisosRef, snapshot => {
 </script>
 </body>
 </html>
+
 
