@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFCCSE · Información</title>
+
+<style>
+:root {
+    --bg-dark: #0a0c0f;
+    --bg-card: #161b22;
+    --bg-input: #0d1117;
+    --text-main: #e6edf3;
+    --text-muted: #8b949e;
+    
+    /* Colores Corporativos */
+    --cnp-border: #1f6feb;
+    --gc-border: #238636;
+    --common-border: #e3b341;
+    --color-border: #30363d;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    line-height: 1.6;
+}
+
+/* === LAYOUT === */
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* === CABECERA === */
+header {
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-main);
+    font-size: 1.8rem;
+}
+
+h3 {
+    margin-top: 0;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    border-bottom: 1px dashed var(--color-border);
+    padding-bottom: 10px;
+}
+
+/* === SECCIONES === */
+.info-card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* Estilo General (Dorado) */
+.section-intro {
+    border-left: 5px solid var(--common-border);
+}
+
+.intro-text {
+    font-size: 1.1rem;
+    color: #d0d7de;
+}
+
+/* Grid para CNP y GC */
+.split-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 800px) {
+    .split-section { grid-template-columns: 1fr; }
+}
+
+/* Estilos Específicos */
+.card-cnp {
+    border-top: 4px solid var(--cnp-border);
+    background: linear-gradient(180deg, rgba(31, 111, 235, 0.05) 0%, var(--bg-card) 100%);
+}
+
+.card-gc {
+    border-top: 4px solid var(--gc-border);
+    background: linear-gradient(180deg, rgba(35, 134, 54, 0.05) 0%, var(--bg-card) 100%);
+}
+
+.card-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* Listas y textos */
+ul {
+    padding-left: 20px;
+    margin: 0;
+}
+
+li {
+    margin-bottom: 8px;
+    color: #d0d7de;
+}
+
+strong {
+    color: #fff;
+}
+
+/* Badges decorativos */
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.bg-cnp { background: var(--cnp-border); color: white; }
+.bg-gc { background: var(--gc-border); color: white; }
+
+/* Botón de volver */
+.action-area {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #1f6feb;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.2s;
+    border: 1px solid var(--color-border);
+}
+
+.btn:hover {
+    background: #1a5cbf;
+    transform: translateY(-2px);
+}
+
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <header>
+        <h2>Información FFCCSE</h2>
+        <small style="color:var(--text-muted)">Fuerzas y Cuerpos de Seguridad del Estado</small>
+    </header>
+
+    <div class="info-card section-intro">
+        <h3>Definición y Misión</h3>
+        <p class="intro-text">
+            Las <strong>Fuerzas y Cuerpos de Seguridad del Estado (FFCCSE)</strong> son los institutos armados de la Administración General del Estado encargados del mantenimiento de la seguridad pública en toda España.
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem;">
+            <em>"Tendrán como misión proteger el libre ejercicio de los derechos y libertades y garantizar la seguridad ciudadana."</em> — Artículo 104 de la Constitución Española.
+        </p>
+    </div>
+
+    <div class="split-section">
+
+        <div class="info-card card-cnp">
+            <span class="card-title" style="color: #58a6ff">Cuerpo Nacional de Policía</span>
+            
+            <p>Instituto armado de naturaleza civil, dependiente del Ministerio del Interior. Opera principalmente en capitales de provincia y términos municipales y núcleos urbanos.</p>
+            
+            <h3>Competencias Exclusivas</h3>
+            <ul>
+                <li><span class="badge bg-cnp">DNI</span> Expedición del Documento Nacional de Identidad y Pasaportes.</li>
+                <li><span class="badge bg-cnp">EXT</span> Control de entrada y salida del territorio nacional (Extranjería).</li>
+                <li><span class="badge bg-cnp">JUEGO</span> Control de la legislación sobre juego.</li>
+                <li><span class="badge bg-cnp">SEG</span> Investigación de delitos relacionados con drogas y crimen organizado en ámbito urbano.</li>
+                <li><span class="badge bg-cnp">PRIV</span> Control de las entidades y servicios de seguridad privada.</li>
+            </ul>
+        </div>
+
+        <div class="info-card card-gc">
+            <span class="card-title" style="color: #3fb950">Guardia Civil</span>
+            
+            <p>Instituto armado de naturaleza militar. Depende del Ministerio del Interior (funciones policiales) y del Ministerio de Defensa (misiones militares). Su ámbito es nacional, preferentemente rural.</p>
+            
+            <h3>Competencias Exclusivas</h3>
+            <ul>
+                <li><span class="badge bg-gc">ARMAS</span> Control de armas y explosivos.</li>
+                <li><span class="badge bg-gc">TRÁFICO</span> Vigilancia del tráfico en vías interurbanas.</li>
+                <li><span class="badge bg-gc">MAR</span> Custodia de costas, fronteras, puertos y aeropuertos (Resguardo Fiscal).</li>
+                <li><span class="badge bg-gc">NATURA</span> Protección de la naturaleza y medio ambiente (SEPRONA).</li>
+                <li><span class="badge bg-gc">CONDU</span> Conducción interurbana de presos y detenidos.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="info-card">
+        <h3>Estructura Operativa Conjunta</h3>
+        <p>En situaciones de emergencia o grandes eventos, ambos cuerpos colaboran bajo mandos conjuntos o a través de las salas de coordinación (091 / 062 / 112).</p>
+        
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-top:15px;">
+            <div style="background:#0d1117; padding:10px; border-radius:4px; border:1px solid #30363d; text-align:center;">
+                <strong style="color:#e3b341">H50 / Jefatura</strong><br>
+                <small style="color:#8b949e">Cadena de Mando</small>
+            </div>
+            <div style="background:#0d1117; padding:10px; border-radius:4px; border:1px solid #30363d; text-align:center;">
+                <strong style="color:#58a6ff">Z / Seguridad Ciudadana</strong><br>
+                <small style="color:#8b949e">Radio Patrullas</small>
+            </div>
+            <div style="background:#0d1117; padding:10px; border-radius:4px; border:1px solid #30363d; text-align:center;">
+                <strong style="color:#f85149">UIP / GRS</strong><br>
+                <small style="color:#8b949e">Orden Público</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-area">
+        <a href="#" onclick="history.back()" class="btn">Volver al Panel Operativo</a>
+    </div>
+
+</div>
+
+</body>
+</html>
